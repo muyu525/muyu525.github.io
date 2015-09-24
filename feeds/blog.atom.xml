@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Richard</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2015-03-13T10:20:00+08:00</updated><entry><title>Kafka简介</title><link href="/my-super-post.html" rel="alternate"></link><updated>2015-03-13T10:20:00+08:00</updated><author><name>muyu525</name></author><id>tag:,2015-03-13:my-super-post.html</id><summary type="html">&lt;!-- This will be turned into :abbr:`HTML (HyperText Markup Language)`. --&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Richard</title><link href="/" rel="alternate"></link><link href="/feeds/blog.atom.xml" rel="self"></link><id>/</id><updated>2015-03-13T10:20:00+08:00</updated><entry><title>Kafka简介</title><link href="/my-super-post.html" rel="alternate"></link><updated>2015-03-13T10:20:00+08:00</updated><author><name>muyu525</name></author><id>tag:,2015-03-13:my-super-post.html</id><summary type="html">&lt;!-- This will be turned into :abbr:`HTML (HyperText Markup Language)`. --&gt;
 &lt;p&gt;Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.&lt;/p&gt;
 &lt;div class="section" id="fast"&gt;
 &lt;h2&gt;Fast&lt;/h2&gt;

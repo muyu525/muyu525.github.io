@@ -7,7 +7,7 @@
         <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Richard Atom Feed" />
 
         <!--[if IE]>
-            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
 </head>
 
@@ -15,38 +15,150 @@
         <header id="banner" class="body">
                 <h1><a href="/">Richard </a></h1>
                 <nav><ul>
-                    <li><a href="/category/yeah.html">yeah</a></li>
-                </ul></nav>
+                    <li><a href="/category/blog.html">blog</a></li>
+                </ul>
+                </nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="/my-super-post.html">My super title</a></h1>
+                    <h1 class="entry-title"><a href="/my-super-post.html">Kafka简介</a></h1>
 <footer class="post-info">
-        <abbr class="published" title="2010-10-03T10:20:00+08:00">
-                Published: 日 03 十月 2010
-        </abbr>
-		<br />
-        <abbr class="modified" title="2010-10-04T18:40:00+08:00">
-                Updated: 一 04 十月 2010
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/alexis-metaireau.html">Alexis Metaireau</a>
-                        <a class="url fn" href="/author/conan-doyle.html">Conan Doyle</a>
-        </address>
-<p>In <a href="/category/yeah.html">yeah</a>.</p>
-<p>tags: <a href="/tag/thats.html">thats</a> <a href="/tag/awesome.html">awesome</a> </p>
-</footer><!-- /.post-info --><p>This will be turned into <abbr title="HyperText Markup Language">HTML</abbr>.</p>
+        <span>Fri 13 March 2015</span>
+<span>| tags: <a href="/tag/log.html">log</a><a href="/tag/kafka.html">kafka</a></span>
+</footer><!-- /.post-info --><!-- This will be turned into :abbr:`HTML (HyperText Markup Language)`. -->
+<p>Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.</p>
+<div class="section" id="fast">
+<h2>Fast</h2>
+<p>A single Kafka broker can handle hundreds of megabytes of reads and writes per second from thousands of clients.</p>
+</div>
+<div class="section" id="scalable">
+<h2>Scalable</h2>
+<p>Kafka is designed to allow a single cluster to serve as the central data backbone for a large organization. It can be elastically and transparently expanded without downtime. Data streams are partitioned and spread over a cluster of machines to allow data streams larger than the capability of any single machine and to allow clusters of co-ordinated consumers</p>
+</div>
+<div class="section" id="durable">
+<h2>Durable</h2>
+<p>Messages are persisted on disk and replicated within the cluster to prevent data loss. Each broker can handle terabytes of messages without performance impact.</p>
+</div>
+<div class="section" id="distributed-by-design">
+<h2>Distributed by Design</h2>
+<p>Kafka has a modern cluster-centric design that offers strong durability and fault-tolerance guarantees.</p>
+</div>
+<div class="section" id="getting-started">
+<h2>1. 入门(Getting Started)</h2>
+</div>
+<div class="section" id="introduction">
+<h2>1.1 简介(Introduction)</h2>
+<p>Kafka is a distributed, partitioned, replicated commit log service.
+它提供了消息系统的功能特性，但有着不同的设计。</p>
+<p>那么这意味着什么呢？</p>
+<p>首先，我们看一下基础的消息术语：</p>
+<ul class="simple">
+<li><em>topics</em> ：Kafka按照 <em>topics</em> 分类管理消息。</li>
+<li><em>producers</em> ：发布消息到Kafka的进程。</li>
+<li><em>consumers</em> ：订阅 <em>topics</em> 并处理消息的进程。</li>
+<li><em>broker</em> ：Kafka是集群服务，每一个集群由多个服务组成，每个服务称为 <em>broker</em>.</li>
+</ul>
+<p>所以，高层设计为 <em>producers</em> 通过网络向Kafka集群发送消息，Kafka集群向 <em>consumers</em> 提供服务。如下图：</p>
+<img alt="Producer Consumer" class="align-center" src="images/kafka/producer_consumer.png" />
+<p>客户端和服务端之间通过简单、高性能的TCP <a class="reference external" href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol">协议</a> 通信。我们提供了Java语言的客户端，其它语言版本可通过这里 <a class="reference external" href="https://cwiki.apache.org/confluence/display/KAFKA/Clients">获取</a> 。</p>
+</div>
+<div class="section" id="topics-and-logs">
+<h2>主题和日志(Topics and Logs)</h2>
+<p>Let's first dive into the high-level abstraction Kafka provides—the topic.
+A topic is a category or feed name to which messages are published. For each topic, the Kafka cluster maintains a partitioned log that looks like this:</p>
+<img alt="Log Anatomy" src="images/kafka/log_anatomy.png" />
+<p>Each partition is an ordered, immutable sequence of messages that is continually appended to—a commit log. The messages in the partitions are each assigned a sequential id number called the offset that uniquely identifies each message within the partition.
+The Kafka cluster retains all published messages—whether or not they have been consumed—for a configurable period of time. For example if the log retention is set to two days, then for the two days after a message is published it is available for consumption, after which it will be discarded to free up space. Kafka's performance is effectively constant with respect to data size so retaining lots of data is not a problem.</p>
+<p>In fact the only metadata retained on a per-consumer basis is the position of the consumer in the log, called the &quot;offset&quot;. This offset is controlled by the consumer: normally a consumer will advance its offset linearly as it reads messages, but in fact the position is controlled by the consumer and it can consume messages in any order it likes. For example a consumer can reset to an older offset to reprocess.</p>
+<p>This combination of features means that Kafka consumers are very cheap—they can come and go without much impact on the cluster or on other consumers. For example, you can use our command line tools to &quot;tail&quot; the contents of any topic without changing what is consumed by any existing consumers.</p>
+<p>The partitions in the log serve several purposes. First, they allow the log to scale beyond a size that will fit on a single server. Each individual partition must fit on the servers that host it, but a topic may have many partitions so it can handle an arbitrary amount of data. Second they act as the unit of parallelism—more on that in a bit.</p>
+<p><strong>Distribution</strong></p>
+<p>The partitions of the log are distributed over the servers in the Kafka cluster with each server handling data and requests for a share of the partitions. Each partition is replicated across a configurable number of servers for fault tolerance.
+Each partition has one server which acts as the &quot;leader&quot; and zero or more servers which act as &quot;followers&quot;. The leader handles all read and write requests for the partition while the followers passively replicate the leader. If the leader fails, one of the followers will automatically become the new leader. Each server acts as a leader for some of its partitions and a follower for others so load is well balanced within the cluster.</p>
+<p><strong>Producers</strong></p>
+<p>Producers publish data to the topics of their choice. The producer is responsible for choosing which message to assign to which partition within the topic. This can be done in a round-robin fashion simply to balance load or it can be done according to some semantic partition function (say based on some key in the message). More on the use of partitioning in a second.</p>
+<p><strong>Consumers</strong></p>
+<p>Messaging traditionally has two models: queuing and publish-subscribe. In a queue, a pool of consumers may read from a server and each message goes to one of them; in publish-subscribe the message is broadcast to all consumers. Kafka offers a single consumer abstraction that generalizes both of these—the consumer group.
+Consumers label themselves with a consumer group name, and each message published to a topic is delivered to one consumer instance within each subscribing consumer group. Consumer instances can be in separate processes or on separate machines.</p>
+<p>If all the consumer instances have the same consumer group, then this works just like a traditional queue balancing load over the consumers.</p>
+<p>If all the consumer instances have different consumer groups, then this works like publish-subscribe and all messages are broadcast to all consumers.</p>
+<p>More commonly, however, we have found that topics have a small number of consumer groups, one for each &quot;logical subscriber&quot;. Each group is composed of many consumer instances for scalability and fault tolerance. This is nothing more than publish-subscribe semantics where the subscriber is cluster of consumers instead of a single process.</p>
+<div class="figure align-right">
+<img alt="Consumer Groups" src="images/kafka/consumer-groups.png" />
+<p class="caption">A two server Kafka cluster hosting four partitions (P0-P3) with two consumer groups. Consumer group A has two consumer instances and group B has four.</p>
+</div>
+<p>Kafka has stronger ordering guarantees than a traditional messaging system, too.</p>
+<p>A traditional queue retains messages in-order on the server, and if multiple consumers consume from the queue then the server hands out messages in the order they are stored. However, although the server hands out messages in order, the messages are delivered asynchronously to consumers, so they may arrive out of order on different consumers. This effectively means the ordering of the messages is lost in the presence of parallel consumption. Messaging systems often work around this by having a notion of &quot;exclusive consumer&quot; that allows only one process to consume from a queue, but of course this means that there is no parallelism in processing.</p>
+<p>Kafka does it better. By having a notion of parallelism—the partition—within the topics, Kafka is able to provide both ordering guarantees and load balancing over a pool of consumer processes. This is achieved by assigning the partitions in the topic to the consumers in the consumer group so that each partition is consumed by exactly one consumer in the group. By doing this we ensure that the consumer is the only reader of that partition and consumes the data in order. Since there are many partitions this still balances the load over many consumer instances. Note however that there cannot be more consumer instances than partitions.</p>
+<p>Kafka only provides a total order over messages within a partition, not between different partitions in a topic. Per-partition ordering combined with the ability to partition data by key is sufficient for most applications. However, if you require a total order over messages this can be achieved with a topic that has only one partition, though this will mean only one consumer process.</p>
+</div>
+<div class="section" id="guarantees">
+<h2>Guarantees</h2>
+<dl class="docutils">
+<dt>At a high-level Kafka gives the following guarantees:</dt>
+<dd><ul class="first last simple">
+<li>Messages sent by a producer to a particular topic partition will be appended in the order they are sent. That is, if a message M1 is sent by the same producer as a message M2, and M1 is sent first, then M1 will have a lower offset than M2 and appear earlier in the log.</li>
+<li>A consumer instance sees messages in the order they are stored in the log.</li>
+<li>For a topic with replication factor N, we will tolerate up to N-1 server failures without losing any messages committed to the log.</li>
+</ul>
+</dd>
+</dl>
+<p>More details on these guarantees are given in the design section of the documentation.</p>
+</div>
+<div class="section" id="use-cases">
+<h2>1.2 Use Cases</h2>
+<p>Here is a description of a few of the popular use cases for Apache Kafka. For an overview of a number of these areas in action, see this blog post.</p>
+<p><strong>Messaging</strong></p>
+<p>Kafka works well as a replacement for a more traditional message broker. Message brokers are used for a variety of reasons (to decouple processing from data producers, to buffer unprocessed messages, etc). In comparison to most messaging systems Kafka has better throughput, built-in partitioning, replication, and fault-tolerance which makes it a good solution for large scale message processing applications.
+In our experience messaging uses are often comparatively low-throughput, but may require low end-to-end latency and often depend on the strong durability guarantees Kafka provides.</p>
+<p>In this domain Kafka is comparable to traditional messaging systems such as ActiveMQ or RabbitMQ.</p>
+<p><strong>Website Activity Tracking</strong></p>
+<p>The original use case for Kafka was to be able to rebuild a user activity tracking pipeline as a set of real-time publish-subscribe feeds. This means site activity (page views, searches, or other actions users may take) is published to central topics with one topic per activity type. These feeds are available for subscription for a range of use cases including real-time processing, real-time monitoring, and loading into Hadoop or offline data warehousing systems for offline processing and reporting.
+Activity tracking is often very high volume as many activity messages are generated for each user page view.</p>
+<p><strong>Metrics</strong></p>
+<p>Kafka is often used for operational monitoring data. This involves aggregating statistics from distributed applications to produce centralized feeds of operational data.</p>
+<p><strong>Log Aggregation</strong></p>
+<p>Many people use Kafka as a replacement for a log aggregation solution. Log aggregation typically collects physical log files off servers and puts them in a central place (a file server or HDFS perhaps) for processing. Kafka abstracts away the details of files and gives a cleaner abstraction of log or event data as a stream of messages. This allows for lower-latency processing and easier support for multiple data sources and distributed data consumption. In comparison to log-centric systems like Scribe or Flume, Kafka offers equally good performance, stronger durability guarantees due to replication, and much lower end-to-end latency.</p>
+<p><strong>Stream Processing</strong></p>
+<p>Many users end up doing stage-wise processing of data where data is consumed from topics of raw data and then aggregated, enriched, or otherwise transformed into new Kafka topics for further consumption. For example a processing flow for article recommendation might crawl article content from RSS feeds and publish it to an &quot;articles&quot; topic; further processing might help normalize or deduplicate this content to a topic of cleaned article content; a final stage might attempt to match this content to users. This creates a graph of real-time data flow out of the individual topics. Storm and Samza are popular frameworks for implementing these kinds of transformations.</p>
+<p><strong>Event Sourcing</strong></p>
+<p>Event sourcing is a style of application design where state changes are logged as a time-ordered sequence of records. Kafka's support for very large stored log data makes it an excellent backend for an application built in this style.</p>
+<p><strong>Commit Log</strong></p>
+<p>Kafka can serve as a kind of external commit-log for a distributed system. The log helps replicate data between nodes and acts as a re-syncing mechanism for failed nodes to restore their data. The log compaction feature in Kafka helps support this usage. In this usage Kafka is similar to Apache BookKeeper project.</p>
+</div>
                 </article>
             </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/lxc-container-1.html" rel="bookmark"
+                           title="Permalink to Linux Container">Linux Container</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <span>Mon 19 January 2015</span>
+<span>| tags: <a href="/tag/lxc.html">lxc</a></span>
+</footer><!-- /.post-info -->                <p class="first last">linux-container简介</p>
+
+                <a class="readmore" href="/lxc-container-1.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+            </ol><!-- /#posts-list -->
+<p class="paginator">
+    Page 1 / 1
+</p>
+            </section><!-- /#content -->
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>blogroll</h2>
                         <ul>
                             <li><a href="http://getpelican.com/">Pelican</a></li>
                             <li><a href="http://python.org/">Python.org</a></li>
-                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
                         </ul>
                 </div><!-- /.blogroll -->
                 <div class="social">
@@ -59,11 +171,7 @@
         </section><!-- /#extras -->
 
         <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
-
-                <!--<p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>-->
+                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
         </footer><!-- /#contentinfo -->
 
 </body>
